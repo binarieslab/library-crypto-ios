@@ -1,6 +1,11 @@
-public struct BLCrypto {
-    public private(set) var text = "Hello, World!"
+//
+//  BLCrypto.swift
+//
+//
+//  Created by Marcelo Sarquis on 21.03.22.
+//
 
-    public init() {
-    }
+import SwiftUI
+
+public struct BLCrypto {
 }
