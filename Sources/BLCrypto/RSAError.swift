@@ -22,11 +22,13 @@ public enum RSAError: Error {
     case invalidBase64String
     case chunkDecryptFailed(index: Int)
     case chunkEncryptFailed(index: Int)
+    case encryptionAlgorithmNotSupported
+    case decryptionAlgorithmNotSupported
     case stringToDataConversionFailed
     case dataToStringConversionFailed
     case invalidDigestSize(digestSize: Int, maxChunkSize: Int)
-    case signatureCreateFailed(status: OSStatus)
-    case signatureVerifyFailed(status: OSStatus)
+    case signatureCreateFailed(status: CFError?)
+    case signatureVerifyFailed(status: CFError?)
     case pemFileNotFound(name: String)
     case derFileNotFound(name: String)
     case notAPublicKey
@@ -61,16 +63,20 @@ public enum RSAError: Error {
             return "Couldn't decrypt chunk at index \(index)"
         case .chunkEncryptFailed(let index):
             return "Couldn't encrypt chunk at index \(index)"
+        case .encryptionAlgorithmNotSupported:
+            return "The algorithm is not supported for the given key"
+        case .decryptionAlgorithmNotSupported:
+            return "The algorithm is not supported for the given key"
         case .stringToDataConversionFailed:
             return "Couldn't convert string to data using specified encoding"
         case .dataToStringConversionFailed:
             return "Couldn't convert data to string representation"
         case .invalidDigestSize(let digestSize, let maxChunkSize):
             return "Provided digest type produces a size (\(digestSize)) that is bigger than the maximum chunk size \(maxChunkSize) of the RSA key"
-        case .signatureCreateFailed(let status):
-            return "Couldn't sign provided data: OSStatus \(status)"
-        case .signatureVerifyFailed(let status):
-            return "Couldn't verify signature of the provided data: OSStatus \(status)"
+        case .signatureCreateFailed(let error):
+            return "Couldn't sign provided data: CFError \(String(describing: error))"
+        case .signatureVerifyFailed(let error):
+            return "Couldn't verify signature of the provided data: CFError \(String(describing: error))"
         case .pemFileNotFound(let name):
             return "Couldn't find a PEM file named '\(name)'"
         case .derFileNotFound(let name):

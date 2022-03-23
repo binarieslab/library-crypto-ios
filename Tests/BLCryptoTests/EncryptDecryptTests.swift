@@ -17,8 +17,8 @@ class EncryptDecryptTests: XCTestCase {
         let str = "Clear Text"
         let clearMessage = try ClearMessage(string: str, using: .utf8)
         
-        let encrypted = try clearMessage.encrypted(with: publicKey, padding: .PKCS1)
-        let decrypted = try encrypted.decrypted(with: privateKey, padding: .PKCS1)
+        let encrypted = try clearMessage.encrypted(with: publicKey, paddingType: .pkcs1)
+        let decrypted = try encrypted.decrypted(with: privateKey, paddingType: .pkcs1)
         
         XCTAssertEqual(try? decrypted.string(encoding: .utf8), str)
     }
@@ -27,8 +27,8 @@ class EncryptDecryptTests: XCTestCase {
         let str = [String](repeating: "a", count: 9999).joined(separator: "")
         let clearMessage = try ClearMessage(string: str, using: .utf8)
         
-        let encrypted = try clearMessage.encrypted(with: publicKey, padding: .PKCS1)
-        let decrypted = try encrypted.decrypted(with: privateKey, padding: .PKCS1)
+        let encrypted = try clearMessage.encrypted(with: publicKey, paddingType: .pkcs1)
+        let decrypted = try encrypted.decrypted(with: privateKey, paddingType: .pkcs1)
         
         XCTAssertEqual(try? decrypted.string(encoding: .utf8), str)
     }
@@ -37,8 +37,8 @@ class EncryptDecryptTests: XCTestCase {
         let data = TestUtils.randomData(count: 2048)
         let clearMessage = ClearMessage(data: data)
         
-        let encrypted = try clearMessage.encrypted(with: publicKey, padding: .PKCS1)
-        let decrypted = try encrypted.decrypted(with: privateKey, padding: .PKCS1)
+        let encrypted = try clearMessage.encrypted(with: publicKey, paddingType: .pkcs1)
+        let decrypted = try encrypted.decrypted(with: privateKey, paddingType: .pkcs1)
         
         XCTAssertEqual(decrypted.data, data)
     }
@@ -65,8 +65,8 @@ class EncryptDecryptTests: XCTestCase {
         let data = TestUtils.randomData(count: 2048)
         let clearMessage = ClearMessage(data: data)
         
-        let encrypted = try clearMessage.encrypted(with: publicKey, padding: .OAEP)
-        let decrypted = try encrypted.decrypted(with: privateKey, padding: .OAEP)
+        let encrypted = try clearMessage.encrypted(with: publicKey, paddingType: .oaep)
+        let decrypted = try encrypted.decrypted(with: privateKey, paddingType: .oaep)
         
         XCTAssertEqual(decrypted.data, data)
     }
@@ -80,29 +80,29 @@ class EncryptDecryptTests: XCTestCase {
         
         // Encrypt with old public key, decrypt with old private key
         do {
-            let encrypted = try clearMessage.encrypted(with: publicKey, padding: .PKCS1)
-            let decrypted = try encrypted.decrypted(with: privateKey, padding: .PKCS1)
+            let encrypted = try clearMessage.encrypted(with: publicKey, paddingType: .pkcs1)
+            let decrypted = try encrypted.decrypted(with: privateKey, paddingType: .pkcs1)
             XCTAssertEqual(decrypted.data, data)
         }
         
         // Encrypt with old public key, decrypt with new private key
         do {
-            let encrypted = try clearMessage.encrypted(with: publicKey, padding: .PKCS1)
-            let decrypted = try encrypted.decrypted(with: newPrivateKey, padding: .PKCS1)
+            let encrypted = try clearMessage.encrypted(with: publicKey, paddingType: .pkcs1)
+            let decrypted = try encrypted.decrypted(with: newPrivateKey, paddingType: .pkcs1)
             XCTAssertEqual(decrypted.data, data)
         }
         
         // Encrypt with new public key, decrypt with old private key
         do {
-            let encrypted = try clearMessage.encrypted(with: newPublicKey, padding: .PKCS1)
-            let decrypted = try encrypted.decrypted(with: privateKey, padding: .PKCS1)
+            let encrypted = try clearMessage.encrypted(with: newPublicKey, paddingType: .pkcs1)
+            let decrypted = try encrypted.decrypted(with: privateKey, paddingType: .pkcs1)
             XCTAssertEqual(decrypted.data, data)
         }
         
         // Encrypt with new public key, decrypt with new private key
         do {
-            let encrypted = try clearMessage.encrypted(with: newPublicKey, padding: .PKCS1)
-            let decrypted = try encrypted.decrypted(with: newPrivateKey, padding: .PKCS1)
+            let encrypted = try clearMessage.encrypted(with: newPublicKey, paddingType: .pkcs1)
+            let decrypted = try encrypted.decrypted(with: newPrivateKey, paddingType: .pkcs1)
             XCTAssertEqual(decrypted.data, data)
         }
     }
@@ -117,29 +117,29 @@ class EncryptDecryptTests: XCTestCase {
         
         // Encrypt with old public key, decrypt with old private key
         do {
-            let encrypted = try clearMessage.encrypted(with: publicKey, padding: .PKCS1)
-            let decrypted = try encrypted.decrypted(with: privateKey, padding: .PKCS1)
+            let encrypted = try clearMessage.encrypted(with: publicKey, paddingType: .pkcs1)
+            let decrypted = try encrypted.decrypted(with: privateKey, paddingType: .pkcs1)
             XCTAssertEqual(decrypted.data, data)
         }
         
         // Encrypt with old public key, decrypt with new private key
         do {
-            let encrypted = try clearMessage.encrypted(with: publicKey, padding: .PKCS1)
-            let decrypted = try encrypted.decrypted(with: newPrivateKey, padding: .PKCS1)
+            let encrypted = try clearMessage.encrypted(with: publicKey, paddingType: .pkcs1)
+            let decrypted = try encrypted.decrypted(with: newPrivateKey, paddingType: .pkcs1)
             XCTAssertEqual(decrypted.data, data)
         }
         
         // Encrypt with new public key, decrypt with old private key
         do {
-            let encrypted = try clearMessage.encrypted(with: newPublicKey, padding: .PKCS1)
-            let decrypted = try encrypted.decrypted(with: privateKey, padding: .PKCS1)
+            let encrypted = try clearMessage.encrypted(with: newPublicKey, paddingType: .pkcs1)
+            let decrypted = try encrypted.decrypted(with: privateKey, paddingType: .pkcs1)
             XCTAssertEqual(decrypted.data, data)
         }
         
         // Encrypt with new public key, decrypt with new private key
         do {
-            let encrypted = try clearMessage.encrypted(with: newPublicKey, padding: .PKCS1)
-            let decrypted = try encrypted.decrypted(with: newPrivateKey, padding: .PKCS1)
+            let encrypted = try clearMessage.encrypted(with: newPublicKey, paddingType: .pkcs1)
+            let decrypted = try encrypted.decrypted(with: newPrivateKey, paddingType: .pkcs1)
             XCTAssertEqual(decrypted.data, data)
         }
     }

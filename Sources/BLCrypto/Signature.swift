@@ -25,6 +25,16 @@ public class Signature {
             case .sha512: return .PKCS1SHA512
             }
         }
+        
+        var keyAlgorithm: KeyAlgorithm {
+            switch self {
+            case .sha1: return .rsaSignatureDigestPKCS1v15SHA1
+            case .sha224: return .rsaSignatureDigestPKCS1v15SHA224
+            case .sha256: return .rsaSignatureDigestPKCS1v15SHA256
+            case .sha384: return .rsaSignatureDigestPKCS1v15SHA384
+            case .sha512: return .rsaSignatureDigestPKCS1v15SHA512
+            }
+        }
     }
     
     /// Data of the signature

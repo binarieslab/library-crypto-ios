@@ -7,6 +7,7 @@
 
 import Foundation
 import CryptoSwift
+import Security
 
 public class ClearMessage: Message {
     
@@ -53,18 +54,20 @@ public class ClearMessage: Message {
     ///   - padding: Padding to use during the encryption
     /// - Returns: Encrypted message
     /// - Throws: RSAError
-    public func encrypted(with key: PublicKey, padding: Padding) throws -> EncryptedMessage {
+    public func encrypted(with key: PublicKey, paddingType: RSA.PaddingType) throws -> EncryptedMessage {
+        
+        guard SecKeyIsAlgorithmSupported(key.reference, .encrypt, paddingType.keyAlgorithm) else {
+            throw RSAError.encryptionAlgorithmNotSupported
+        }
         
         let blockSize = SecKeyGetBlockSize(key.reference)
         
         var maxChunkSize: Int
-        switch padding {
-        case []:
-            maxChunkSize = blockSize
-        case .OAEP:
-            maxChunkSize = blockSize - 42
-        default:
-            maxChunkSize = blockSize - 11
+        switch paddingType {
+        case .pkcs1:
+            maxChunkSize = blockSize - 2 - 40
+        case .oaep:
+            maxChunkSize = blockSize - 2 - 64
         }
         
         var decryptedDataAsArray = [UInt8](repeating: 0, count: data.count)
@@ -77,12 +80,13 @@ public class ClearMessage: Message {
             let idxEnd = min(idx + maxChunkSize, decryptedDataAsArray.count)
             let chunkData = [UInt8](decryptedDataAsArray[idx..<idxEnd])
             
-            var encryptedDataBuffer = [UInt8](repeating: 0, count: blockSize)
-            var encryptedDataLength = blockSize
+            let dataToEncrypt = NSData(bytes: chunkData, length: chunkData.count)
             
-            let status = SecKeyEncrypt(key.reference, padding, chunkData, chunkData.count, &encryptedDataBuffer, &encryptedDataLength)
+            var error: Unmanaged<CFError>?
             
-            guard status == noErr else {
+            let createdEncryptedData = SecKeyCreateEncryptedData(key.reference, paddingType.keyAlgorithm, dataToEncrypt as CFData, &error)
+            
+            guard let encryptedDataBuffer = createdEncryptedData as NSData? else {
                 throw RSAError.chunkEncryptFailed(index: idx)
             }
             
@@ -116,17 +120,17 @@ public class ClearMessage: Message {
         
         var digestBytes = [UInt8](repeating: 0, count: digest.count)
         (digest as NSData).getBytes(&digestBytes, length: digest.count)
+        let dataToSign = NSData(bytes: digestBytes, length: digest.count)
         
-        var signatureBytes = [UInt8](repeating: 0, count: blockSize)
-        var signatureDataLength = blockSize
+        var error: Unmanaged<CFError>?
         
-        let status = SecKeyRawSign(key.reference, digestType.padding, digestBytes, digestBytes.count, &signatureBytes, &signatureDataLength)
+        let createdSignature = SecKeyCreateSignature(key.reference, digestType.keyAlgorithm, dataToSign, &error)
         
-        guard status == noErr else {
-            throw RSAError.signatureCreateFailed(status: status)
+        guard let createdSignature = createdSignature, error == nil else {
+            throw RSAError.signatureCreateFailed(status: error?.takeRetainedValue())
         }
         
-        let signatureData = Data(bytes: signatureBytes, count: signatureBytes.count)
+        let signatureData = createdSignature as Data
         return Signature(data: signatureData)
     }
     
@@ -143,19 +147,21 @@ public class ClearMessage: Message {
         let digest = self.digest(digestType: digestType)
         var digestBytes = [UInt8](repeating: 0, count: digest.count)
         (digest as NSData).getBytes(&digestBytes, length: digest.count)
+        let signedData = NSData(bytes: digestBytes, length: digest.count)
         
         var signatureBytes = [UInt8](repeating: 0, count: signature.data.count)
         (signature.data as NSData).getBytes(&signatureBytes, length: signature.data.count)
+        let signatureData = NSData(bytes: signatureBytes, length: signature.data.count)
         
-        let status = SecKeyRawVerify(key.reference, digestType.padding, digestBytes, digestBytes.count, signatureBytes, signatureBytes.count)
+        var error: Unmanaged<CFError>?
         
-        if status == errSecSuccess {
-            return true
-        } else if status == -9809 {
-            return false
-        } else {
-            throw RSAError.signatureVerifyFailed(status: status)
+        let isSignatureIntact = SecKeyVerifySignature(key.reference, digestType.keyAlgorithm, signedData, signatureData, &error)
+        
+        if let error = error {
+            throw RSAError.signatureVerifyFailed(status: error.takeRetainedValue())
         }
+        
+        return isSignatureIntact
     }
     
     func digest(digestType: Signature.DigestType) -> Data {

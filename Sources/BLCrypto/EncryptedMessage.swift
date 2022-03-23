@@ -26,7 +26,12 @@ public class EncryptedMessage: Message {
     ///   - padding: Padding to use during the decryption
     /// - Returns: Clear message
     /// - Throws: RSAError
-    public func decrypted(with key: PrivateKey, padding: Padding) throws -> ClearMessage {
+    public func decrypted(with key: PrivateKey, paddingType: RSA.PaddingType) throws -> ClearMessage {
+        
+        guard SecKeyIsAlgorithmSupported(key.reference, .decrypt, paddingType.keyAlgorithm) else {
+            throw RSAError.decryptionAlgorithmNotSupported
+        }
+        
         let blockSize = SecKeyGetBlockSize(key.reference)
         
         var encryptedDataAsArray = [UInt8](repeating: 0, count: data.count)
@@ -39,15 +44,17 @@ public class EncryptedMessage: Message {
             let idxEnd = min(idx + blockSize, encryptedDataAsArray.count)
             let chunkData = [UInt8](encryptedDataAsArray[idx..<idxEnd])
             
-            var decryptedDataBuffer = [UInt8](repeating: 0, count: blockSize)
-            var decryptedDataLength = blockSize
+            let dataToDecrypt = NSData(bytes: chunkData, length: chunkData.count)
             
-            let status = SecKeyDecrypt(key.reference, padding, chunkData, idxEnd-idx, &decryptedDataBuffer, &decryptedDataLength)
-            guard status == noErr else {
+            var error: Unmanaged<CFError>?
+            
+            let createdDecryptedData = SecKeyCreateDecryptedData(key.reference, paddingType.keyAlgorithm, dataToDecrypt, &error)
+            
+            guard let decryptedDataBuffer = createdDecryptedData as NSData? else {
                 throw RSAError.chunkDecryptFailed(index: idx)
             }
             
-            decryptedDataBytes += [UInt8](decryptedDataBuffer[0..<decryptedDataLength])
+            decryptedDataBytes += decryptedDataBuffer
             
             idx += blockSize
         }

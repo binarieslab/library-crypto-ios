@@ -9,8 +9,21 @@ import Foundation
 import Security
 
 public typealias Padding = SecPadding
+public typealias KeyAlgorithm = SecKeyAlgorithm
 
 public enum RSA {
+    
+    public enum PaddingType {
+        case pkcs1
+        case oaep
+        
+        var keyAlgorithm: KeyAlgorithm {
+            switch self {
+            case .pkcs1: return .rsaEncryptionPKCS1
+            case .oaep: return .rsaEncryptionOAEPSHA256
+            }
+        }
+    }
     
     static func base64String(pemEncoded pemString: String) throws -> String {
         let lines = pemString.components(separatedBy: "\n").filter { line in
