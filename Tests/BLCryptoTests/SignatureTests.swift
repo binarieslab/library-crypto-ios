@@ -20,8 +20,8 @@ class SignatureTests: XCTestCase {
         for digestType in digestTypes {
             let data = TestUtils.randomData(count: 8192)
             let message = ClearMessage(data: data)
-            let signature = try message.signed(with: privateKey, digestType: digestType)
-            let isSuccessful = try message.verify(with: publicKey, signature: signature, digestType: digestType)
+            let signature = try RSA.sign(message, with: privateKey, digestType: digestType)
+            let isSuccessful = try RSA.verify(message, with: publicKey, signature: signature, digestType: digestType)
             XCTAssertTrue(isSuccessful)
         }
     }
@@ -29,7 +29,7 @@ class SignatureTests: XCTestCase {
     func test_base64String() throws {
         let data = TestUtils.randomData(count: 8192)
         let message = ClearMessage(data: data)
-        let signature = try message.signed(with: privateKey, digestType: .sha1)
+        let signature = try RSA.sign(message, with: privateKey, digestType: .sha1)
         XCTAssertEqual(signature.base64String, signature.data.base64EncodedString())
     }
     

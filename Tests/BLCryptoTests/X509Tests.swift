@@ -94,8 +94,8 @@ class X509CertificateTests: XCTestCase {
         let clear = "Hello world !"
         let clearMessage = try ClearMessage(string: clear, using: .utf8)
         
-        let encrypted = try clearMessage.encrypted(with: PublicKey(data: publicKeyX509), paddingType: .pkcs1)
-        let decrypted = try encrypted.decrypted(with: PrivateKey(data: privateKeyX509), paddingType: .pkcs1)
+        let encrypted = try RSA.encrypt(clearMessage, with: PublicKey(data: publicKeyX509), paddingType: .pkcs1)
+        let decrypted = try RSA.decrypt(encrypted, with: PrivateKey(data: privateKeyX509), paddingType: .pkcs1)
         
         XCTAssertEqual(try? decrypted.string(encoding: .utf8), clear)
     }
@@ -112,8 +112,8 @@ class X509CertificateTests: XCTestCase {
         let clear = [String](repeating: "a", count: 9999).joined(separator: "")
         let clearMessage = try ClearMessage(string: clear, using: .utf8)
         
-        let encrypted = try clearMessage.encrypted(with: PublicKey(data: publicKeyX509), paddingType: .pkcs1)
-        let decrypted = try encrypted.decrypted(with: PrivateKey(data: privateKeyX509), paddingType: .pkcs1)
+        let encrypted = try RSA.encrypt(clearMessage, with: PublicKey(data: publicKeyX509), paddingType: .pkcs1)
+        let decrypted = try RSA.decrypt(encrypted, with: PrivateKey(data: privateKeyX509), paddingType: .pkcs1)
         
         XCTAssertEqual(try? decrypted.string(encoding: .utf8), clear)
     }
@@ -130,8 +130,8 @@ class X509CertificateTests: XCTestCase {
         let data = TestUtils.randomData(count: 2048)
         let clearMessage = ClearMessage(data: data)
         
-        let encrypted = try clearMessage.encrypted(with: PublicKey(data: publicKeyX509), paddingType: .pkcs1)
-        let decrypted = try encrypted.decrypted(with: PrivateKey(data: privateKeyX509), paddingType: .pkcs1)
+        let encrypted = try RSA.encrypt(clearMessage, with: PublicKey(data: publicKeyX509), paddingType: .pkcs1)
+        let decrypted = try RSA.decrypt(encrypted, with: PrivateKey(data: privateKeyX509), paddingType: .pkcs1)
         
         XCTAssertEqual(decrypted.data, data)
     }

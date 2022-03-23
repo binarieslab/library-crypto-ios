@@ -5,6 +5,7 @@
 //  Created by Marcelo Sarquis on 21.03.22.
 //
 
+import CryptoSwift
 import Foundation
 import Security
 
@@ -116,6 +117,169 @@ public enum RSA {
             
             return unwrappedData
         }
+    }
+    
+    /// Encrypts a clear message with a public key and returns an encrypted message.
+    ///
+    /// - Parameters:
+    ///   - clearMessage: ClearMessage you want to encrypt
+    ///   - key: Public key to encrypt the clear message with
+    ///   - padding: Padding to use during the encryption
+    /// - Returns: Encrypted message
+    /// - Throws: RSAError
+    public static func encrypt(_ clearMessage: ClearMessage, with key: PublicKey, paddingType: PaddingType) throws -> EncryptedMessage {
+        
+        guard SecKeyIsAlgorithmSupported(key.reference, .encrypt, paddingType.keyAlgorithm) else {
+            throw RSAError.encryptionAlgorithmNotSupported
+        }
+        
+        let blockSize = SecKeyGetBlockSize(key.reference)
+        
+        var maxChunkSize: Int
+        switch paddingType {
+        case .pkcs1:
+            maxChunkSize = blockSize - 2 - 40
+        case .oaep:
+            maxChunkSize = blockSize - 2 - 64
+        }
+        
+        var decryptedDataAsArray = [UInt8](repeating: 0, count: clearMessage.data.count)
+        (clearMessage.data as NSData).getBytes(&decryptedDataAsArray, length: clearMessage.data.count)
+        
+        var encryptedDataBytes = [UInt8](repeating: 0, count: 0)
+        var idx = 0
+        while idx < decryptedDataAsArray.count {
+            
+            let idxEnd = min(idx + maxChunkSize, decryptedDataAsArray.count)
+            let chunkData = [UInt8](decryptedDataAsArray[idx..<idxEnd])
+            
+            let dataToEncrypt = NSData(bytes: chunkData, length: chunkData.count)
+            
+            var error: Unmanaged<CFError>?
+            
+            let createdEncryptedData = SecKeyCreateEncryptedData(key.reference, paddingType.keyAlgorithm, dataToEncrypt as CFData, &error)
+            
+            guard let encryptedDataBuffer = createdEncryptedData as NSData? else {
+                throw RSAError.chunkEncryptFailed(index: idx)
+            }
+            
+            encryptedDataBytes += encryptedDataBuffer
+            
+            idx += maxChunkSize
+        }
+        
+        let encryptedData = Data(bytes: encryptedDataBytes, count: encryptedDataBytes.count)
+        return EncryptedMessage(data: encryptedData)
+    }
+    
+    /// Decrypts an encrypted message with a private key and returns a clear message.
+    ///
+    /// - Parameters:
+    ///   - encryptedMessage: EncryptedMessage you want to decrypt
+    ///   - key: Private key to decrypt the mssage with
+    ///   - padding: Padding to use during the decryption
+    /// - Returns: Clear message
+    /// - Throws: RSAError
+    public static func decrypt(_ encryptedMessage: EncryptedMessage, with key: PrivateKey, paddingType: RSA.PaddingType) throws -> ClearMessage {
+        
+        guard SecKeyIsAlgorithmSupported(key.reference, .decrypt, paddingType.keyAlgorithm) else {
+            throw RSAError.decryptionAlgorithmNotSupported
+        }
+        
+        let blockSize = SecKeyGetBlockSize(key.reference)
+        
+        var encryptedDataAsArray = [UInt8](repeating: 0, count: encryptedMessage.data.count)
+        (encryptedMessage.data as NSData).getBytes(&encryptedDataAsArray, length: encryptedMessage.data.count)
+        
+        var decryptedDataBytes = [UInt8](repeating: 0, count: 0)
+        var idx = 0
+        while idx < encryptedDataAsArray.count {
+            
+            let idxEnd = min(idx + blockSize, encryptedDataAsArray.count)
+            let chunkData = [UInt8](encryptedDataAsArray[idx..<idxEnd])
+            
+            let dataToDecrypt = NSData(bytes: chunkData, length: chunkData.count)
+            
+            var error: Unmanaged<CFError>?
+            
+            let createdDecryptedData = SecKeyCreateDecryptedData(key.reference, paddingType.keyAlgorithm, dataToDecrypt, &error)
+            
+            guard let decryptedDataBuffer = createdDecryptedData as NSData? else {
+                throw RSAError.chunkDecryptFailed(index: idx)
+            }
+            
+            decryptedDataBytes += decryptedDataBuffer
+            
+            idx += blockSize
+        }
+        
+        let decryptedData = Data(bytes: decryptedDataBytes, count: decryptedDataBytes.count)
+        return ClearMessage(data: decryptedData)
+    }
+    
+    /// Signs a clear message using a private key.
+    /// The clear message will first be hashed using the specified digest type, then signed
+    /// using the provided private key.
+    ///
+    /// - Parameters:
+    ///   - key: Private key to sign the clear message with
+    ///   - digestType: Digest
+    /// - Returns: Signature of the clear message after signing it with the specified digest type.
+    /// - Throws: RSAError
+    public static func sign(_ clearMessage: ClearMessage, with key: PrivateKey, digestType: Signature.DigestType) throws -> Signature {
+        
+        let digest = clearMessage.digest(digestType: digestType)
+        let blockSize = SecKeyGetBlockSize(key.reference)
+        let maxChunkSize = blockSize - 11
+        
+        guard digest.count <= maxChunkSize else {
+            throw RSAError.invalidDigestSize(digestSize: digest.count, maxChunkSize: maxChunkSize)
+        }
+        
+        var digestBytes = [UInt8](repeating: 0, count: digest.count)
+        (digest as NSData).getBytes(&digestBytes, length: digest.count)
+        let dataToSign = NSData(bytes: digestBytes, length: digest.count)
+        
+        var error: Unmanaged<CFError>?
+        
+        let createdSignature = SecKeyCreateSignature(key.reference, digestType.keyAlgorithm, dataToSign, &error)
+        
+        guard let createdSignature = createdSignature, error == nil else {
+            throw RSAError.signatureCreateFailed(status: error?.takeRetainedValue())
+        }
+        
+        let signatureData = createdSignature as Data
+        return Signature(data: signatureData)
+    }
+    
+    /// Verifies the signature of a clear message.
+    ///
+    /// - Parameters:
+    ///   - key: Public key to verify the signature with
+    ///   - signature: Signature to verify
+    ///   - digestType: Digest type used for the signature
+    /// - Returns: Result of the verification
+    /// - Throws: RSAError
+    public static func verify(_ clearMessage: ClearMessage, with key: PublicKey, signature: Signature, digestType: Signature.DigestType) throws -> Bool {
+        
+        let digest = clearMessage.digest(digestType: digestType)
+        var digestBytes = [UInt8](repeating: 0, count: digest.count)
+        (digest as NSData).getBytes(&digestBytes, length: digest.count)
+        let signedData = NSData(bytes: digestBytes, length: digest.count)
+        
+        var signatureBytes = [UInt8](repeating: 0, count: signature.data.count)
+        (signature.data as NSData).getBytes(&signatureBytes, length: signature.data.count)
+        let signatureData = NSData(bytes: signatureBytes, length: signature.data.count)
+        
+        var error: Unmanaged<CFError>?
+        
+        let isSignatureIntact = SecKeyVerifySignature(key.reference, digestType.keyAlgorithm, signedData, signatureData, &error)
+        
+        if let error = error {
+            throw RSAError.signatureVerifyFailed(status: error.takeRetainedValue())
+        }
+        
+        return isSignatureIntact
     }
     
     /// Will generate a new private and public key
@@ -340,6 +504,27 @@ public enum RSA {
         ]
         
         SecItemDelete(keyRemoveDict as CFDictionary)
+    }
+}
+
+private extension ClearMessage {
+    
+    func digest(digestType: Signature.DigestType) -> Data {
+        
+        let digest: Data
+        switch digestType {
+        case .sha1:
+            digest = data.sha1()
+        case .sha224:
+            digest = data.sha224()
+        case .sha256:
+            digest = data.sha256()
+        case .sha384:
+            digest = data.sha384()
+        case .sha512:
+            digest = data.sha512()
+        }
+        return digest
     }
 }
 
