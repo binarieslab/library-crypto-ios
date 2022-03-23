@@ -1,13 +1,14 @@
 //
-//  RSAError.swift
+//  BLCryptoError.swift
 //  
 //
 //  Created by Marcelo Sarquis on 21.03.22.
 //
 
 import Foundation
+import CommonCrypto
 
-public enum RSAError: Error {
+public enum BLCryptoError: Error {
     
     case pemDoesNotContainKey
     case keyRepresentationFailed(error: CFError?)
@@ -34,6 +35,7 @@ public enum RSAError: Error {
     case notAPublicKey
     case notAPrivateKey
     case x509CertificateFailed
+    case cryptCBCPKCS7ccError(status: CCCryptorStatus)
     
     var localizedDescription: String {
         switch self {
@@ -85,8 +87,10 @@ public enum RSAError: Error {
             return "Provided key is not a valid RSA public key"
         case .notAPrivateKey:
             return "Provided key is not a valid RSA pivate key"
-        case .x509CertificateFailed :
+        case .x509CertificateFailed:
             return "Couldn't prepend the provided key because it has an unexpected structure"
+        case .cryptCBCPKCS7ccError(let status):
+            return "Couldn't complete the crpt operation with status '\(status)'"
         }
     }
 }

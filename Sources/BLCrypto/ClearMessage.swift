@@ -24,10 +24,10 @@ public class ClearMessage: Message {
     /// - Parameters:
     ///   - string: String value of the clear message
     ///   - encoding: Encoding to use to generate the clear data
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public convenience init(string: String, using encoding: String.Encoding) throws {
         guard let data = string.data(using: encoding) else {
-            throw RSAError.stringToDataConversionFailed
+            throw BLCryptoError.stringToDataConversionFailed
         }
         self.init(data: data)
     }
@@ -37,10 +37,10 @@ public class ClearMessage: Message {
     ///
     /// - Parameter encoding: Encoding to use during the string conversion
     /// - Returns: String representation of the clear message
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public func string(encoding: String.Encoding) throws -> String {
         guard let str = String(data: data, encoding: encoding) else {
-            throw RSAError.dataToStringConversionFailed
+            throw BLCryptoError.dataToStringConversionFailed
         }
         return str
     }

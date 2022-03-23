@@ -21,7 +21,7 @@ public class PublicKey: Key {
     /// Returns a PEM representation of the public key.
     ///
     /// - Returns: Data of the key, PEM-encoded
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public func pemString() throws -> String {
         let data = try self.data()
         let pem = RSA.format(keyData: data, withPemType: "RSA PUBLIC KEY")
@@ -32,11 +32,11 @@ public class PublicKey: Key {
     /// This initializer will throw if the provided key reference is not a public RSA key.
     ///
     /// - Parameter reference: Reference to the key within the keychain.
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public required init(reference: SecKey) throws {
         
         guard RSA.isValidKeyReference(reference, forClass: kSecAttrKeyClassPublic) else {
-            throw RSAError.notAPublicKey
+            throw BLCryptoError.notAPublicKey
         }
         
         self.reference = reference
@@ -47,7 +47,7 @@ public class PublicKey: Key {
     /// This method throws if RSA cannot extract data from the key.
     ///
     /// - Returns: Data of the public key as returned by the keychain.
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     required public init(data: Data) throws {
         
         self.originalData = data

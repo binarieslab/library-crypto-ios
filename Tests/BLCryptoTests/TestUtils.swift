@@ -54,23 +54,23 @@ struct TestError: Error {
         return Data(randomBytes)
     }
     
-    static func assertThrows(type: RSAError, file: StaticString = #file, line: UInt = #line, block: () throws ->  Void) {
+    static func assertThrows(type: BLCryptoError, file: StaticString = #file, line: UInt = #line, block: () throws ->  Void) {
         do {
             try block()
             XCTFail("The line above should fail", file: file, line: line)
         } catch {
-            guard let swiftyRsaError = error as? RSAError else {
-                return XCTFail("Error is not a SwiftyRSAError", file: file, line: line)
+            guard let swiftyBLCryptoError = error as? BLCryptoError else {
+                return XCTFail("Error is not a SwiftyBLCryptoError", file: file, line: line)
             }
-            XCTAssertEqual(swiftyRsaError, type, file: file, line: line)
+            XCTAssertEqual(swiftyBLCryptoError, type, file: file, line: line)
         }
     }
 }
 // swiftlint:enable force_try
 // swiftlint:enable force_unwrapping
 
-extension RSAError: Equatable {
-    public static func == (lhs: RSAError, rhs: RSAError) -> Bool {
+extension BLCryptoError: Equatable {
+    public static func == (lhs: BLCryptoError, rhs: BLCryptoError) -> Bool {
         switch (lhs, rhs) {
         case
             (.pemDoesNotContainKey, .pemDoesNotContainKey),

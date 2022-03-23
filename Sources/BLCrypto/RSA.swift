@@ -38,7 +38,7 @@ public enum RSA {
         }
         
         guard lines.count != 0 else {
-            throw RSAError.pemDoesNotContainKey
+            throw BLCryptoError.pemDoesNotContainKey
         }
         
         return lines.joined(separator: "")
@@ -85,7 +85,7 @@ public enum RSA {
         var error: Unmanaged<CFError>?
         let data = SecKeyCopyExternalRepresentation(reference, &error)
         guard let unwrappedData = data as Data? else {
-            throw RSAError.keyRepresentationFailed(error: error?.takeRetainedValue())
+            throw BLCryptoError.keyRepresentationFailed(error: error?.takeRetainedValue())
         }
         return unwrappedData
     }
@@ -97,11 +97,11 @@ public enum RSA {
     ///   - key: Public key to encrypt the clear message with
     ///   - padding: Padding to use during the encryption
     /// - Returns: Encrypted message
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public static func encrypt(_ clearMessage: ClearMessage, with key: PublicKey, paddingType: PaddingType) throws -> EncryptedMessage {
         
         guard SecKeyIsAlgorithmSupported(key.reference, .encrypt, paddingType.keyAlgorithm) else {
-            throw RSAError.encryptionAlgorithmNotSupported
+            throw BLCryptoError.encryptionAlgorithmNotSupported
         }
         
         let blockSize = SecKeyGetBlockSize(key.reference)
@@ -131,7 +131,7 @@ public enum RSA {
             let createdEncryptedData = SecKeyCreateEncryptedData(key.reference, paddingType.keyAlgorithm, dataToEncrypt as CFData, &error)
             
             guard let encryptedDataBuffer = createdEncryptedData as NSData? else {
-                throw RSAError.chunkEncryptFailed(index: idx)
+                throw BLCryptoError.chunkEncryptFailed(index: idx)
             }
             
             encryptedDataBytes += encryptedDataBuffer
@@ -150,11 +150,11 @@ public enum RSA {
     ///   - key: Private key to decrypt the mssage with
     ///   - padding: Padding to use during the decryption
     /// - Returns: Clear message
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public static func decrypt(_ encryptedMessage: EncryptedMessage, with key: PrivateKey, paddingType: RSA.PaddingType) throws -> ClearMessage {
         
         guard SecKeyIsAlgorithmSupported(key.reference, .decrypt, paddingType.keyAlgorithm) else {
-            throw RSAError.decryptionAlgorithmNotSupported
+            throw BLCryptoError.decryptionAlgorithmNotSupported
         }
         
         let blockSize = SecKeyGetBlockSize(key.reference)
@@ -176,7 +176,7 @@ public enum RSA {
             let createdDecryptedData = SecKeyCreateDecryptedData(key.reference, paddingType.keyAlgorithm, dataToDecrypt, &error)
             
             guard let decryptedDataBuffer = createdDecryptedData as NSData? else {
-                throw RSAError.chunkDecryptFailed(index: idx)
+                throw BLCryptoError.chunkDecryptFailed(index: idx)
             }
             
             decryptedDataBytes += decryptedDataBuffer
@@ -196,7 +196,7 @@ public enum RSA {
     ///   - key: Private key to sign the clear message with
     ///   - digestType: Digest
     /// - Returns: Signature of the clear message after signing it with the specified digest type.
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public static func sign(_ clearMessage: ClearMessage, with key: PrivateKey, digestType: Signature.DigestType) throws -> Signature {
         
         let digest = clearMessage.digest(digestType: digestType)
@@ -204,7 +204,7 @@ public enum RSA {
         let maxChunkSize = blockSize - 11
         
         guard digest.count <= maxChunkSize else {
-            throw RSAError.invalidDigestSize(digestSize: digest.count, maxChunkSize: maxChunkSize)
+            throw BLCryptoError.invalidDigestSize(digestSize: digest.count, maxChunkSize: maxChunkSize)
         }
         
         var digestBytes = [UInt8](repeating: 0, count: digest.count)
@@ -216,7 +216,7 @@ public enum RSA {
         let createdSignature = SecKeyCreateSignature(key.reference, digestType.keyAlgorithm, dataToSign, &error)
         
         guard let createdSignature = createdSignature, error == nil else {
-            throw RSAError.signatureCreateFailed(status: error?.takeRetainedValue())
+            throw BLCryptoError.signatureCreateFailed(status: error?.takeRetainedValue())
         }
         
         let signatureData = createdSignature as Data
@@ -230,7 +230,7 @@ public enum RSA {
     ///   - signature: Signature to verify
     ///   - digestType: Digest type used for the signature
     /// - Returns: Result of the verification
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public static func verify(_ clearMessage: ClearMessage, with key: PublicKey, signature: Signature, digestType: Signature.DigestType) throws -> Bool {
         
         let digest = clearMessage.digest(digestType: digestType)
@@ -247,7 +247,7 @@ public enum RSA {
         let isSignatureIntact = SecKeyVerifySignature(key.reference, digestType.keyAlgorithm, signedData, signatureData, &error)
         
         if let error = error {
-            throw RSAError.signatureVerifyFailed(status: error.takeRetainedValue())
+            throw BLCryptoError.signatureVerifyFailed(status: error.takeRetainedValue())
         }
         
         return isSignatureIntact
@@ -266,7 +266,7 @@ public enum RSA {
     static func generateRSAKeyPair(size sizeType: SizeType, applyUnitTestWorkaround: Bool = false) throws -> (privateKey: PrivateKey, publicKey: PublicKey) {
       
         guard let tagData = UUID().uuidString.data(using: .utf8) else {
-            throw RSAError.stringToDataConversionFailed
+            throw BLCryptoError.stringToDataConversionFailed
         }
         
         // @hack Don't store permanently when running unit tests, otherwise we'll get a key creation error (NSOSStatusErrorDomain -50)
@@ -286,7 +286,7 @@ public enum RSA {
         var error: Unmanaged<CFError>?
         guard let privKey = SecKeyCreateRandomKey(attributes as CFDictionary, &error),
             let pubKey = SecKeyCopyPublicKey(privKey) else {
-            throw RSAError.keyGenerationFailed(error: error?.takeRetainedValue())
+            throw BLCryptoError.keyGenerationFailed(error: error?.takeRetainedValue())
         }
         let privateKey = try PrivateKey(reference: privKey)
         let publicKey = try PublicKey(reference: pubKey)
@@ -308,7 +308,7 @@ public enum RSA {
         
         var error: Unmanaged<CFError>?
         guard let key = SecKeyCreateWithData(keyData as CFData, keyDict as CFDictionary, &error) else {
-            throw RSAError.keyCreateFailed(error: error?.takeRetainedValue())
+            throw BLCryptoError.keyCreateFailed(error: error?.takeRetainedValue())
         }
         return key
     }
@@ -346,12 +346,12 @@ public enum RSA {
         do {
             node = try Asn1Parser.parse(data: keyData)
         } catch {
-            throw RSAError.asn1ParsingFailed
+            throw BLCryptoError.asn1ParsingFailed
         }
         
         // Ensure the raw data is an ASN1 sequence
         guard case .sequence(let nodes) = node else {
-            throw RSAError.invalidAsn1RootNode
+            throw BLCryptoError.invalidAsn1RootNode
         }
         
         // Detect whether the sequence only has integers, in which case it's a headerless key
@@ -378,7 +378,7 @@ public enum RSA {
         }
         
         // Unable to extract bit/octet string or raw integer sequence
-        throw RSAError.invalidAsn1Structure
+        throw BLCryptoError.invalidAsn1Structure
     }
     
     /**
@@ -407,7 +407,7 @@ public enum RSA {
         } else if try keyData.hasX509Header() {
             return keyData
         } else { // invalideHeader
-            throw RSAError.x509CertificateFailed
+            throw BLCryptoError.x509CertificateFailed
         }
     }
 }

@@ -50,10 +50,10 @@ public class Signature {
     /// Creates a signature with a base64-encoded string.
     ///
     /// - Parameter base64String: Base64-encoded representation of the signature data.
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public convenience init(base64Encoded base64String: String) throws {
         guard let data = Data(base64Encoded: base64String) else {
-            throw RSAError.invalidBase64String
+            throw BLCryptoError.invalidBase64String
         }
         self.init(data: data)
     }

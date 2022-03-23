@@ -19,7 +19,7 @@ public class PrivateKey: Key {
     /// Returns a PEM representation of the private key.
     ///
     /// - Returns: Data of the key, PEM-encoded
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public func pemString() throws -> String {
         let data = try self.data()
         let pem = RSA.format(keyData: data, withPemType: "RSA PRIVATE KEY")
@@ -30,11 +30,11 @@ public class PrivateKey: Key {
     /// This initializer will throw if the provided key reference is not a private RSA key.
     ///
     /// - Parameter reference: Reference to the key within the keychain.
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     public required init(reference: SecKey) throws {
         
         guard RSA.isValidKeyReference(reference, forClass: kSecAttrKeyClassPrivate) else {
-            throw RSAError.notAPrivateKey
+            throw BLCryptoError.notAPrivateKey
         }
         
         self.reference = reference
@@ -44,7 +44,7 @@ public class PrivateKey: Key {
     /// Creates a private key with a RSA public key data.
     ///
     /// - Parameter data: Private key data
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     required public init(data: Data) throws {
         self.originalData = data
         let dataWithoutHeader = try RSA.stripKeyHeader(keyData: data)

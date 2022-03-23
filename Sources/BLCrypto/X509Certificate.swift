@@ -95,7 +95,7 @@ public extension Data {
         do {
             node = try Asn1Parser.parse(data: self)
         } catch {
-            throw RSAError.asn1ParsingFailed
+            throw BLCryptoError.asn1ParsingFailed
         }
         
         // Ensure the raw data is an ASN1 sequence
@@ -140,7 +140,7 @@ public extension Data {
         do {
             node = try Asn1Parser.parse(data: self)
         } catch {
-            throw RSAError.asn1ParsingFailed
+            throw BLCryptoError.asn1ParsingFailed
         }
         
         // Ensure the raw data is an ASN1 sequence

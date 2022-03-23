@@ -30,7 +30,7 @@ public extension Key {
     /// Returns a Base64 representation of the public key.
     ///
     /// - Returns: Data of the key, Base64-encoded
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     func base64String() throws -> String {
         return try data().base64EncodedString()
     }
@@ -42,10 +42,10 @@ public extension Key {
     /// Creates a public key with a base64-encoded string.
     ///
     /// - Parameter base64String: Base64-encoded public key data
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     init(base64Encoded base64String: String) throws {
         guard let data = Data(base64Encoded: base64String, options: [.ignoreUnknownCharacters]) else {
-            throw RSAError.invalidBase64String
+            throw BLCryptoError.invalidBase64String
         }
         try self.init(data: data)
     }
@@ -53,7 +53,7 @@ public extension Key {
     /// Creates a public key with a PEM string.
     ///
     /// - Parameter pemString: PEM-encoded public key string
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     init(pemEncoded pemString: String) throws {
         let base64String = try RSA.base64String(pemEncoded: pemString)
         try self.init(base64Encoded: base64String)
@@ -64,10 +64,10 @@ public extension Key {
     /// - Parameters:
     ///   - pemName: Name of the PEM file
     ///   - bundle: Bundle in which to look for the PEM file. Defaults to the main bundle.
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     init(pemNamed pemName: String, in bundle: Bundle = Bundle.main) throws {
         guard let path = bundle.path(forResource: pemName, ofType: "pem") else {
-            throw RSAError.pemFileNotFound(name: pemName)
+            throw BLCryptoError.pemFileNotFound(name: pemName)
         }
         let keyString = try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
         try self.init(pemEncoded: keyString)
@@ -78,10 +78,10 @@ public extension Key {
     /// - Parameters:
     ///   - derName: Name of the DER file
     ///   - bundle: Bundle in which to look for the DER file. Defaults to the main bundle.
-    /// - Throws: RSAError
+    /// - Throws: BLCryptoError
     init(derNamed derName: String, in bundle: Bundle = Bundle.main) throws {
         guard let path = bundle.path(forResource: derName, ofType: "der") else {
-            throw RSAError.derFileNotFound(name: derName)
+            throw BLCryptoError.derFileNotFound(name: derName)
         }
         let data = try Data(contentsOf: URL(fileURLWithPath: path))
         try self.init(data: data)
