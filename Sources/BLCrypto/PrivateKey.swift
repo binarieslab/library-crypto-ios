@@ -16,8 +16,6 @@ public class PrivateKey: Key {
     /// Note that it does not contain PEM headers and holds data as bytes, not as a base 64 string.
     public let originalData: Data?
     
-    let tag: String?
-    
     /// Returns a PEM representation of the private key.
     ///
     /// - Returns: Data of the key, PEM-encoded
@@ -40,7 +38,6 @@ public class PrivateKey: Key {
         }
         
         self.reference = reference
-        self.tag = nil
         self.originalData = nil
     }
     
@@ -50,15 +47,7 @@ public class PrivateKey: Key {
     /// - Throws: RSAError
     required public init(data: Data) throws {
         self.originalData = data
-        let tag = UUID().uuidString
-        self.tag = tag
         let dataWithoutHeader = try RSA.stripKeyHeader(keyData: data)
-        reference = try RSA.addKey(dataWithoutHeader, isPublic: false, tag: tag)
-    }
-    
-    deinit {
-        if let tag = tag {
-            RSA.removeKey(tag: tag)
-        }
+        reference = try RSA.addKey(dataWithoutHeader, isPublic: false)
     }
 }

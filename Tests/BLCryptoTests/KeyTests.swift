@@ -21,12 +21,6 @@ class PublicKeyTests: XCTestCase {
     }
     
     func test_initWithReference_failsWithPrivateKey() throws {
-        
-        // We can't do key reference checking on iOS 8/9
-        guard #available(iOS 10.0, *) else {
-            return
-        }
-        
         guard let path = TestUtils.bundle.path(forResource: "swiftyrsa-private", ofType: "pem") else {
             return XCTFail("file not found in bundle")
         }
@@ -171,12 +165,6 @@ class PrivateKeyTests: XCTestCase {
     }
     
     func test_initWithReference_failsWithPublicKey() throws {
-        
-        // We can't do key reference checking on iOS 8/9
-        guard #available(iOS 10.0, *) else {
-            return
-        }
-        
         guard let path = TestUtils.bundle.path(forResource: "swiftyrsa-public", ofType: "der") else {
             return XCTFail("file not found in bundle")
         }
@@ -245,12 +233,7 @@ class PrivateKeyTests: XCTestCase {
     }
     
     func test_generateKeyPair() throws {
-        
-        guard #available(iOS 10.0, watchOS 3.0, tvOS 10.0, *) else {
-            return
-        }
-        
-        let keyPair = try RSA.generateRSAKeyPair(sizeInBits: 2048, applyUnitTestWorkaround: true)
+        let keyPair = try RSA.generateRSAKeyPair(size: .bit2048, applyUnitTestWorkaround: true)
         
         let algorithm: SecKeyAlgorithm = .rsaEncryptionOAEPSHA512
         guard SecKeyIsAlgorithmSupported(keyPair.privateKey.reference, .decrypt, algorithm) else {

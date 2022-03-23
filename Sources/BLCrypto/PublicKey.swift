@@ -18,8 +18,6 @@ public class PublicKey: Key {
     /// or base64 characters.
     public let originalData: Data?
     
-    let tag: String?
-    
     /// Returns a PEM representation of the public key.
     ///
     /// - Returns: Data of the key, PEM-encoded
@@ -42,7 +40,6 @@ public class PublicKey: Key {
         }
         
         self.reference = reference
-        self.tag = nil
         self.originalData = nil
     }
     
@@ -53,13 +50,10 @@ public class PublicKey: Key {
     /// - Throws: RSAError
     required public init(data: Data) throws {
         
-        let tag = UUID().uuidString
-        self.tag = tag
-        
         self.originalData = data
         let dataWithoutHeader = try RSA.stripKeyHeader(keyData: data)
         
-        reference = try RSA.addKey(dataWithoutHeader, isPublic: true, tag: tag)
+        reference = try RSA.addKey(dataWithoutHeader, isPublic: true)
     }
     
     static let publicKeyRegex: NSRegularExpression? = {
@@ -105,11 +99,5 @@ public class PublicKey: Key {
         }
         
         return keys
-    }
-    
-    deinit {
-        if let tag = tag {
-            RSA.removeKey(tag: tag)
-        }
     }
 }
