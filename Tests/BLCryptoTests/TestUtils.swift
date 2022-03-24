@@ -13,7 +13,7 @@ struct TestError: Error {
     let description: String
 }
 
-@objc public class TestUtils: NSObject {
+public class TestUtils: NSObject {
     
     static let bundle = Bundle.module
     
@@ -27,7 +27,6 @@ struct TestError: Error {
         return (try! Data(contentsOf: URL(fileURLWithPath: pubPath)))
     }
     
-    @nonobjc
     static public func publicKey(name: String) throws -> PublicKey {
         guard let path = bundle.path(forResource: name, ofType: "pem") else {
             throw TestError(description: "Couldn't load key for provided path")
@@ -36,22 +35,12 @@ struct TestError: Error {
         return try PublicKey(pemEncoded: pemString)
     }
     
-    @nonobjc
     static public func privateKey(name: String) throws -> PrivateKey {
         guard let path = bundle.path(forResource: name, ofType: "pem") else {
             throw TestError(description: "Couldn't load key for provided path")
         }
         let pemString = try String(contentsOf: URL(fileURLWithPath: path))
         return try PrivateKey(pemEncoded: pemString)
-    }
-    
-    static public func randomData(count: Int) -> Data {
-        var randomBytes = [UInt8](repeating: 0, count: count)
-        let status = SecRandomCopyBytes(kSecRandomDefault, count, &randomBytes)
-        if status != errSecSuccess {
-             XCTFail("Couldn't create random data")
-        }
-        return Data(randomBytes)
     }
     
     static func assertThrows(type: BLCryptoError, file: StaticString = #file, line: UInt = #line, block: () throws ->  Void) {
@@ -66,8 +55,6 @@ struct TestError: Error {
         }
     }
 }
-// swiftlint:enable force_try
-// swiftlint:enable force_unwrapping
 
 extension BLCryptoError: Equatable {
     public static func == (lhs: BLCryptoError, rhs: BLCryptoError) -> Bool {

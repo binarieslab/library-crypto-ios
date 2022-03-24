@@ -399,7 +399,6 @@ public enum RSA {
                         INTEGER (1024 or 2048 bit) -- modulo
                         INTEGER -- public exponent
      */
-    
     static func prependX509KeyHeader(keyData: Data) throws -> Data {
         if try keyData.isAnHeaderlessKey() {
             let x509certificate: Data = keyData.prependx509Header()

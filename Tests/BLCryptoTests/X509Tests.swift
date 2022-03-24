@@ -127,7 +127,7 @@ class X509CertificateTests: XCTestCase {
         let privateKeyX509 = try RSA.prependX509KeyHeader(keyData: privateKeyData)
         let publicKeyX509 = try RSA.prependX509KeyHeader(keyData: publicKeyData)
         
-        let data = TestUtils.randomData(count: 2048)
+        let data = Utils.randomData(count: 2048)
         let clearMessage = ClearMessage(data: data)
         
         let encrypted = try RSA.encrypt(clearMessage, with: PublicKey(data: publicKeyX509), paddingType: .pkcs1)

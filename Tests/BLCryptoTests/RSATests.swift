@@ -8,7 +8,7 @@
 import XCTest
 @testable import BLCrypto
 
-class EncryptDecryptTests: XCTestCase {
+class RSATests: XCTestCase {
     
     let publicKey = try! TestUtils.publicKey(name: "swiftyrsa-public") // swiftlint:disable:this force_try
     let privateKey = try! TestUtils.privateKey(name: "swiftyrsa-private") // swiftlint:disable:this force_try
@@ -34,7 +34,7 @@ class EncryptDecryptTests: XCTestCase {
     }
     
     func test_randomBytes() throws {
-        let data = TestUtils.randomData(count: 2048)
+        let data = Utils.randomData(count: 2048)
         let clearMessage = ClearMessage(data: data)
         
         let encrypted = try RSA.encrypt(clearMessage, with: publicKey, paddingType: .pkcs1)
@@ -46,7 +46,7 @@ class EncryptDecryptTests: XCTestCase {
     // See https://github.com/TakeScoop/SwiftyRSA/issues/135
 //    func test_noPadding() throws {
 //
-//        let data = TestUtils.randomData(count: 128)
+//        let data = Utils.randomData(count: 128)
 //        let clearMessage = ClearMessage(data: data)
 //        let encrypted = try RSA.encrypt(clearMessage, with: publicKey, padding: [])
 //
@@ -62,7 +62,7 @@ class EncryptDecryptTests: XCTestCase {
 //    }
     
     func test_OAEP() throws {
-        let data = TestUtils.randomData(count: 2048)
+        let data = Utils.randomData(count: 2048)
         let clearMessage = ClearMessage(data: data)
         
         let encrypted = try RSA.encrypt(clearMessage, with: publicKey, paddingType: .oaep)
@@ -72,7 +72,7 @@ class EncryptDecryptTests: XCTestCase {
     }
     
     func test_keyReferences() throws {
-        let data = TestUtils.randomData(count: 2048)
+        let data = Utils.randomData(count: 2048)
         let clearMessage = ClearMessage(data: data)
         
         let newPublicKey = try PublicKey(reference: publicKey.reference)
@@ -109,7 +109,7 @@ class EncryptDecryptTests: XCTestCase {
     
     func test_keyData() throws {
         
-        let data = TestUtils.randomData(count: 2048)
+        let data = Utils.randomData(count: 2048)
         let clearMessage = ClearMessage(data: data)
         
         let newPublicKey = try PublicKey(data: try publicKey.data())
