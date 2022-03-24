@@ -22,6 +22,11 @@ public class TestUtils: NSObject {
         return (try! NSString(contentsOfFile: pubPath, encoding: String.Encoding.utf8.rawValue)) as String
     }
     
+    static public func contentsOfFile(name: String) -> Data {
+        let pubPath  = bundle.path(forResource: name, ofType: nil)!
+        return (try! Data(contentsOf: URL(fileURLWithPath: pubPath)))
+    }
+    
     static public func derKeyData(name: String) -> Data {
         let pubPath  = bundle.path(forResource: name, ofType: "der")!
         return (try! Data(contentsOf: URL(fileURLWithPath: pubPath)))
@@ -60,8 +65,12 @@ extension BLCryptoError: Equatable {
     public static func == (lhs: BLCryptoError, rhs: BLCryptoError) -> Bool {
         switch (lhs, rhs) {
         case
+            (.aesGCMEncryptionFailed, .aesGCMEncryptionFailed),
+            (.aesGCMDecryptionFailed, .aesGCMDecryptionFailed),
             (.pemDoesNotContainKey, .pemDoesNotContainKey),
             (.keyRepresentationFailed, .keyRepresentationFailed),
+            (.keyGenerationFailed, .keyGenerationFailed),
+            (.keyCreateFailed, .keyCreateFailed),
             (.keyAddFailed, .keyAddFailed),
             (.keyCopyFailed, .keyCopyFailed),
             (.tagEncodingFailed, .tagEncodingFailed),
@@ -69,8 +78,10 @@ extension BLCryptoError: Equatable {
             (.invalidAsn1RootNode, .invalidAsn1RootNode),
             (.invalidAsn1Structure, .invalidAsn1Structure),
             (.invalidBase64String, .invalidBase64String),
-            (.chunkDecryptFailed, .chunkDecryptFailed),
-            (.chunkEncryptFailed, .chunkEncryptFailed),
+            (.rsaChunkDecryptFailed, .rsaChunkDecryptFailed),
+            (.rsaChunkEncryptFailed, .rsaChunkEncryptFailed),
+            (.encryptionAlgorithmNotSupported, .encryptionAlgorithmNotSupported),
+            (.decryptionAlgorithmNotSupported, .decryptionAlgorithmNotSupported),
             (.stringToDataConversionFailed, .stringToDataConversionFailed),
             (.dataToStringConversionFailed, .dataToStringConversionFailed),
             (.invalidDigestSize, .invalidDigestSize),
@@ -79,7 +90,9 @@ extension BLCryptoError: Equatable {
             (.pemFileNotFound, .pemFileNotFound),
             (.derFileNotFound, .derFileNotFound),
             (.notAPublicKey, .notAPublicKey),
-            (.notAPrivateKey, .notAPrivateKey):
+            (.notAPrivateKey, .notAPrivateKey),
+            (.x509CertificateFailed, .x509CertificateFailed),
+            (.cryptCBCPKCS7ccError, .cryptCBCPKCS7ccError):
             return true
         default:
             return false

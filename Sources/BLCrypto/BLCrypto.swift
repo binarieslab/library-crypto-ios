@@ -103,7 +103,7 @@ public struct BLCrypto {
 }
 
 /// DTO for AES256 authentication
-private struct CipherAttr: Codable {
+struct CipherAttr: Codable {
     
     /// Authentication key
     let key: Data

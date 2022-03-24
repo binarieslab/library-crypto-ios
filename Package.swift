@@ -54,7 +54,13 @@ let package = Package(
                 .copy("Resources/Keys/swiftyrsa-public-base64.txt"),
                 .copy("Resources/Keys/swiftyrsa-public-headerless.pem"),
                 .copy("Resources/Keys/swiftyrsa-public.der"),
-                .copy("Resources/Keys/swiftyrsa-public.pem")
+                .copy("Resources/Keys/swiftyrsa-public.pem"),
+                .copy("Resources/Keys/ehr-gcm-contract-cipher-key-base64"),
+                .copy("Resources/Keys/ehr-gcm-contract-message-base64"),
+                .copy("Resources/Keys/openssl-private-key-pkcs1-pem"),
+                .copy("Resources/Keys/openssl-public-key-pkcs1-pem"),
+                .copy("Resources/Keys/ehr-cbc-contract-message-base64"),
+                .copy("Resources/Keys/ehr-cbc-contract-cipher-key-base64")
             ]
         ),
     ]

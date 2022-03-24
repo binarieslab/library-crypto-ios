@@ -81,15 +81,21 @@ public struct AES256 {
     ///
     /// - Parameter data: data to encrypt
     /// - Returns: tuple of encrypted data, authentication key and initialization vector
-    /// - Throws: any errors throws by CryptoSwift
+    /// - Throws: BLCryptoError
     static func encryptGCM(data: Data, key: Data, iv: Data) throws -> Data {
         
-        let blockMode = GCM(iv: iv.bytes, mode: .combined)
-        let aes = try AES(key: key.bytes, blockMode: blockMode, padding: .noPadding)
-        let digest = try aes.encrypt(data.bytes)
-        
-        let encrypted = Data(digest)
-        return encrypted
+        do {
+            let blockMode = GCM(iv: iv.bytes, mode: .combined)
+            
+            let aes = try AES(key: key.bytes, blockMode: blockMode, padding: .noPadding)
+            let digest = try aes.encrypt(data.bytes)
+            
+            let encrypted = Data(digest)
+            return encrypted
+            
+        } catch {
+            throw BLCryptoError.aesGCMEncryptionFailed
+        }
     }
     
     /// Decrypts data with GCM block mode
@@ -102,12 +108,17 @@ public struct AES256 {
     /// - Throws: any errors throws by CryptoSwift
     static func decryptGCM(data: Data, key: Data, iv: Data) throws -> Data {
         
-        let blockMode = GCM(iv: iv.bytes, mode: .combined)
-        let aes = try AES(key: key.bytes, blockMode: blockMode, padding: .noPadding)
-        let digest = try aes.decrypt(data.bytes)
-        
-        let decrypted = Data(digest)
-        return decrypted
+        do {
+            let blockMode = GCM(iv: iv.bytes, mode: .combined)
+            let aes = try AES(key: key.bytes, blockMode: blockMode, padding: .noPadding)
+            let digest = try aes.decrypt(data.bytes)
+            
+            let decrypted = Data(digest)
+            return decrypted
+            
+        } catch {
+            throw BLCryptoError.aesGCMDecryptionFailed
+        }
     }
     
     /// Single function for encryption with CBC block mode
@@ -126,7 +137,7 @@ public struct AES256 {
         
         var dataOut = [UInt8](repeating: 0, count: data.count + kCCBlockSizeAES128)
         var dataOutMoved = 0
-        var status: CCCryptorStatus!
+        var status: CCCryptorStatus = CCCryptorStatus(kCCUnspecifiedError)
         
         key.withUnsafeBytes { ptr in
             

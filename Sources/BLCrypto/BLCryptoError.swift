@@ -10,6 +10,8 @@ import CommonCrypto
 
 public enum BLCryptoError: Error {
     
+    case aesGCMEncryptionFailed
+    case aesGCMDecryptionFailed
     case pemDoesNotContainKey
     case keyRepresentationFailed(error: CFError?)
     case keyGenerationFailed(error: CFError?)
@@ -21,8 +23,8 @@ public enum BLCryptoError: Error {
     case invalidAsn1RootNode
     case invalidAsn1Structure
     case invalidBase64String
-    case chunkDecryptFailed(index: Int)
-    case chunkEncryptFailed(index: Int)
+    case rsaChunkDecryptFailed(index: Int)
+    case rsaChunkEncryptFailed(index: Int)
     case encryptionAlgorithmNotSupported
     case decryptionAlgorithmNotSupported
     case stringToDataConversionFailed
@@ -39,6 +41,10 @@ public enum BLCryptoError: Error {
     
     var localizedDescription: String {
         switch self {
+        case .aesGCMEncryptionFailed:
+            return "Couldn't encrypt AES for block type GCM."
+        case .aesGCMDecryptionFailed:
+            return "Couldn't decrypt AES for block type GCM."
         case .pemDoesNotContainKey:
             return "Couldn't get data from PEM key: no data available after stripping headers"
         case .keyRepresentationFailed(let error):
@@ -61,9 +67,9 @@ public enum BLCryptoError: Error {
             return "Couldn't parse the provided key because it has an unexpected ASN1 structure"
         case .invalidBase64String:
             return "The provided string is not a valid Base 64 string"
-        case .chunkDecryptFailed(let index):
+        case .rsaChunkDecryptFailed(let index):
             return "Couldn't decrypt chunk at index \(index)"
-        case .chunkEncryptFailed(let index):
+        case .rsaChunkEncryptFailed(let index):
             return "Couldn't encrypt chunk at index \(index)"
         case .encryptionAlgorithmNotSupported:
             return "The algorithm is not supported for the given key"

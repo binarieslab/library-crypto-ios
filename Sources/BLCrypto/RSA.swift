@@ -131,7 +131,7 @@ public enum RSA {
             let createdEncryptedData = SecKeyCreateEncryptedData(key.reference, paddingType.keyAlgorithm, dataToEncrypt as CFData, &error)
             
             guard let encryptedDataBuffer = createdEncryptedData as NSData? else {
-                throw BLCryptoError.chunkEncryptFailed(index: idx)
+                throw BLCryptoError.rsaChunkEncryptFailed(index: idx)
             }
             
             encryptedDataBytes += encryptedDataBuffer
@@ -176,7 +176,7 @@ public enum RSA {
             let createdDecryptedData = SecKeyCreateDecryptedData(key.reference, paddingType.keyAlgorithm, dataToDecrypt, &error)
             
             guard let decryptedDataBuffer = createdDecryptedData as NSData? else {
-                throw BLCryptoError.chunkDecryptFailed(index: idx)
+                throw BLCryptoError.rsaChunkDecryptFailed(index: idx)
             }
             
             decryptedDataBytes += decryptedDataBuffer

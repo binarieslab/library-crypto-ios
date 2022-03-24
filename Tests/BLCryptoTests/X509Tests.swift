@@ -10,8 +10,8 @@ import XCTest
 
 class X509CertificateTests: XCTestCase {
     
-    let publicKey = try! TestUtils.publicKey(name: "swiftyrsa-public") // swiftlint:disable:this force_try
-    let privateKey = try! TestUtils.privateKey(name: "swiftyrsa-private") // swiftlint:disable:this force_try
+    let publicKey = try! TestUtils.publicKey(name: "swiftyrsa-public")
+    let privateKey = try! TestUtils.privateKey(name: "swiftyrsa-private")
     
     /// Verify the ASN1 sruc with the ASN1 parser (private key)
     func testX509CertificateValidityPrivateKey() throws {

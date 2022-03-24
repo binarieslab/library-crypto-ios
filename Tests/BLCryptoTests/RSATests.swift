@@ -10,8 +10,8 @@ import XCTest
 
 class RSATests: XCTestCase {
     
-    let publicKey = try! TestUtils.publicKey(name: "swiftyrsa-public") // swiftlint:disable:this force_try
-    let privateKey = try! TestUtils.privateKey(name: "swiftyrsa-private") // swiftlint:disable:this force_try
+    let publicKey = try! TestUtils.publicKey(name: "swiftyrsa-public")
+    let privateKey = try! TestUtils.privateKey(name: "swiftyrsa-private")
     
     func test_simple() throws {
         let str = "Clear Text"
