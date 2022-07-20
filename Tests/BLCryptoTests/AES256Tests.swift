@@ -24,6 +24,10 @@ final class AES256Tests: XCTestCase {
         XCTAssertEqual(decryptedString, secret)
     }
     
+    func testSimpleMath() throws {
+        XCTAssertEqual(1, 2)
+    }
+    
 //    func testCBC_encryptWithCryptoSwiftDecryptWithKrypt__shouldDoFullLoop() throws {
 //        // given
 //        let secret = UUID().uuidString
