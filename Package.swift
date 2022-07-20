@@ -20,16 +20,16 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(
-            url: "git@github.com:krzyzanowskim/CryptoSwift.git",
-            .upToNextMajor(from: "1.4.3")
-        )
+//        .package(
+//            url: "git@github.com:krzyzanowskim/CryptoSwift.git",
+//            .upToNextMajor(from: "1.4.3")
+//        )
     ],
     targets: [
         .target(
             name: "BLCrypto",
             dependencies: [
-                "CryptoSwift"
+//                "CryptoSwift"
             ]
         ),
         .testTarget(

@@ -5,7 +5,7 @@
 //  Created by Marcelo Sarquis on 21.03.22.
 //
 
-import CryptoSwift
+//import CryptoSwift
 import Foundation
 import Security
 
@@ -16,12 +16,12 @@ public enum RSA {
     
     public enum PaddingType {
         case pkcs1
-        case oaep
+//        case oaep
         
         var keyAlgorithm: KeyAlgorithm {
             switch self {
             case .pkcs1: return .rsaEncryptionPKCS1
-            case .oaep: return .rsaEncryptionOAEPSHA256
+//            case .oaep: return .rsaEncryptionOAEPSHA256
             }
         }
     }
@@ -110,8 +110,8 @@ public enum RSA {
         switch paddingType {
         case .pkcs1:
             maxChunkSize = blockSize - 2 - 40
-        case .oaep:
-            maxChunkSize = blockSize - 2 - 64
+//        case .oaep:
+//            maxChunkSize = blockSize - 2 - 64
         }
         
         var decryptedDataAsArray = [UInt8](repeating: 0, count: clearMessage.data.count)
@@ -197,31 +197,31 @@ public enum RSA {
     ///   - digestType: Digest
     /// - Returns: Signature of the clear message after signing it with the specified digest type.
     /// - Throws: BLCryptoError
-    public static func sign(_ clearMessage: ClearMessage, with key: PrivateKey, digestType: Signature.DigestType) throws -> Signature {
-        
-        let digest = clearMessage.digest(digestType: digestType)
-        let blockSize = SecKeyGetBlockSize(key.reference)
-        let maxChunkSize = blockSize - 11
-        
-        guard digest.count <= maxChunkSize else {
-            throw BLCryptoError.invalidDigestSize(digestSize: digest.count, maxChunkSize: maxChunkSize)
-        }
-        
-        var digestBytes = [UInt8](repeating: 0, count: digest.count)
-        (digest as NSData).getBytes(&digestBytes, length: digest.count)
-        let dataToSign = NSData(bytes: digestBytes, length: digest.count)
-        
-        var error: Unmanaged<CFError>?
-        
-        let createdSignature = SecKeyCreateSignature(key.reference, digestType.keyAlgorithm, dataToSign, &error)
-        
-        guard let createdSignature = createdSignature, error == nil else {
-            throw BLCryptoError.signatureCreateFailed(status: error?.takeRetainedValue())
-        }
-        
-        let signatureData = createdSignature as Data
-        return Signature(data: signatureData)
-    }
+//    public static func sign(_ clearMessage: ClearMessage, with key: PrivateKey, digestType: Signature.DigestType) throws -> Signature {
+//        
+//        let digest = clearMessage.digest(digestType: digestType)
+//        let blockSize = SecKeyGetBlockSize(key.reference)
+//        let maxChunkSize = blockSize - 11
+//        
+//        guard digest.count <= maxChunkSize else {
+//            throw BLCryptoError.invalidDigestSize(digestSize: digest.count, maxChunkSize: maxChunkSize)
+//        }
+//        
+//        var digestBytes = [UInt8](repeating: 0, count: digest.count)
+//        (digest as NSData).getBytes(&digestBytes, length: digest.count)
+//        let dataToSign = NSData(bytes: digestBytes, length: digest.count)
+//        
+//        var error: Unmanaged<CFError>?
+//        
+//        let createdSignature = SecKeyCreateSignature(key.reference, digestType.keyAlgorithm, dataToSign, &error)
+//        
+//        guard let createdSignature = createdSignature, error == nil else {
+//            throw BLCryptoError.signatureCreateFailed(status: error?.takeRetainedValue())
+//        }
+//        
+//        let signatureData = createdSignature as Data
+//        return Signature(data: signatureData)
+//    }
     
     /// Verifies the signature of a clear message.
     ///
@@ -231,27 +231,27 @@ public enum RSA {
     ///   - digestType: Digest type used for the signature
     /// - Returns: Result of the verification
     /// - Throws: BLCryptoError
-    public static func verify(_ clearMessage: ClearMessage, with key: PublicKey, signature: Signature, digestType: Signature.DigestType) throws -> Bool {
-        
-        let digest = clearMessage.digest(digestType: digestType)
-        var digestBytes = [UInt8](repeating: 0, count: digest.count)
-        (digest as NSData).getBytes(&digestBytes, length: digest.count)
-        let signedData = NSData(bytes: digestBytes, length: digest.count)
-        
-        var signatureBytes = [UInt8](repeating: 0, count: signature.data.count)
-        (signature.data as NSData).getBytes(&signatureBytes, length: signature.data.count)
-        let signatureData = NSData(bytes: signatureBytes, length: signature.data.count)
-        
-        var error: Unmanaged<CFError>?
-        
-        let isSignatureIntact = SecKeyVerifySignature(key.reference, digestType.keyAlgorithm, signedData, signatureData, &error)
-        
-        if let error = error {
-            throw BLCryptoError.signatureVerifyFailed(status: error.takeRetainedValue())
-        }
-        
-        return isSignatureIntact
-    }
+//    public static func verify(_ clearMessage: ClearMessage, with key: PublicKey, signature: Signature, digestType: Signature.DigestType) throws -> Bool {
+//
+//        let digest = clearMessage.digest(digestType: digestType)
+//        var digestBytes = [UInt8](repeating: 0, count: digest.count)
+//        (digest as NSData).getBytes(&digestBytes, length: digest.count)
+//        let signedData = NSData(bytes: digestBytes, length: digest.count)
+//
+//        var signatureBytes = [UInt8](repeating: 0, count: signature.data.count)
+//        (signature.data as NSData).getBytes(&signatureBytes, length: signature.data.count)
+//        let signatureData = NSData(bytes: signatureBytes, length: signature.data.count)
+//
+//        var error: Unmanaged<CFError>?
+//
+//        let isSignatureIntact = SecKeyVerifySignature(key.reference, digestType.keyAlgorithm, signedData, signatureData, &error)
+//
+//        if let error = error {
+//            throw BLCryptoError.signatureVerifyFailed(status: error.takeRetainedValue())
+//        }
+//
+//        return isSignatureIntact
+//    }
     
     /// Will generate a new private and public key
     ///
@@ -411,26 +411,26 @@ public enum RSA {
     }
 }
 
-private extension ClearMessage {
-    
-    func digest(digestType: Signature.DigestType) -> Data {
-        
-        let digest: Data
-        switch digestType {
-        case .sha1:
-            digest = data.sha1()
-        case .sha224:
-            digest = data.sha224()
-        case .sha256:
-            digest = data.sha256()
-        case .sha384:
-            digest = data.sha384()
-        case .sha512:
-            digest = data.sha512()
-        }
-        return digest
-    }
-}
+//private extension ClearMessage {
+//
+//    func digest(digestType: Signature.DigestType) -> Data {
+//
+//        let digest: Data
+//        switch digestType {
+//        case .sha1:
+//            digest = data.sha1()
+//        case .sha224:
+//            digest = data.sha224()
+//        case .sha256:
+//            digest = data.sha256()
+//        case .sha384:
+//            digest = data.sha384()
+//        case .sha512:
+//            digest = data.sha512()
+//        }
+//        return digest
+//    }
+//}
 
 #if !swift(>=4.1)
 extension Array {

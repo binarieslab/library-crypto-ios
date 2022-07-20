@@ -60,17 +60,17 @@ final class AES256Tests: XCTestCase {
 //        XCTAssertEqual(decryptedString, secret)
 //    }
     
-    func testGCM_encryptDecrypt__shouldDoFullLoop() throws {
-        // given
-        let secret = UUID().uuidString
-        let secretData = secret.data(using: .utf8)!
-
-        // when
-        let (encrypted, key) = try AES256.encrypt(ClearMessage(data: secretData), blockType: .gcm)
-        let decrypted = try AES256.decrypt(encrypted, with: key, blockType: .gcm)
-        let decryptedString = String(data: decrypted.data, encoding: .utf8)
-
-        // then
-        XCTAssertEqual(decryptedString, secret)
-    }
+//    func testGCM_encryptDecrypt__shouldDoFullLoop() throws {
+//        // given
+//        let secret = UUID().uuidString
+//        let secretData = secret.data(using: .utf8)!
+//
+//        // when
+//        let (encrypted, key) = try AES256.encrypt(ClearMessage(data: secretData), blockType: .gcm)
+//        let decrypted = try AES256.decrypt(encrypted, with: key, blockType: .gcm)
+//        let decryptedString = String(data: decrypted.data, encoding: .utf8)
+//
+//        // then
+//        XCTAssertEqual(decryptedString, secret)
+//    }
 }
