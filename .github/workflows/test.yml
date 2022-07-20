@@ -10,12 +10,6 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        repository: krzyzanowskim/CryptoSwift
-    - name: Build
-      run: swift build -v
+    - uses: actions/checkout@v1
     - name: Run tests
-      run: swift test --test-product BLCrypto
+      run: swift test --enable-code-coverage
