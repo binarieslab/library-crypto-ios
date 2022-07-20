@@ -61,15 +61,15 @@ class RSATests: XCTestCase {
 //        XCTAssertEqual(decrypted.data, data)
 //    }
     
-    func test_OAEP() throws {
-        let data = Utils.randomData(count: 2048)
-        let clearMessage = ClearMessage(data: data)
-        
-        let encrypted = try RSA.encrypt(clearMessage, with: publicKey, paddingType: .oaep)
-        let decrypted = try RSA.decrypt(encrypted, with: privateKey, paddingType: .oaep)
-        
-        XCTAssertEqual(decrypted.data, data)
-    }
+//    func test_OAEP() throws {
+//        let data = Utils.randomData(count: 2048)
+//        let clearMessage = ClearMessage(data: data)
+//        
+//        let encrypted = try RSA.encrypt(clearMessage, with: publicKey, paddingType: .oaep)
+//        let decrypted = try RSA.decrypt(encrypted, with: privateKey, paddingType: .oaep)
+//        
+//        XCTAssertEqual(decrypted.data, data)
+//    }
     
     func test_keyReferences() throws {
         let data = Utils.randomData(count: 2048)

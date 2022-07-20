@@ -14,14 +14,14 @@ public struct BLCrypto {
     /// - gcmOAEP: AES 256 GCM symetric | RSA OAEP SHA256 asymetric
     /// - cbcPKCS1: AES 256 CBC symetric | RSA PKCS7 asymetric
     public enum VersionType {
-        case gcmOAEP
+//        case gcmOAEP
         case cbcPKCS1
         
         /// returns AES block mode depending on Vivy encryption version
         var aes256BlockMode: AES256.BlockType {
             switch self {
-            case .gcmOAEP:
-                return .gcm
+//            case .gcmOAEP:
+//                return .gcm
             case .cbcPKCS1:
                 return .cbc
             }
@@ -30,8 +30,8 @@ public struct BLCrypto {
         /// returns RSA padding depending on Vivy encryption version
         var rsaPaddingType: RSA.PaddingType {
             switch self {
-            case .gcmOAEP:
-                return .oaep
+//            case .gcmOAEP:
+//                return .oaep
             case .cbcPKCS1:
                 return .pkcs1
             }
