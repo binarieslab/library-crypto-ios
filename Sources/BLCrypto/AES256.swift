@@ -5,22 +5,19 @@
 //  Created by Marcelo Sarquis on 23.03.22.
 //
 
-//import CryptoSwift
 import CommonCrypto
 import Foundation
 
 /// Symetric encryption used in Binaries Lab.
 ///
 /// Only 256 bits (32 bytes) long keys are supported along with
-/// GCM and CBC being the only supported block modes
+/// CBC being the only supported block modes
 public struct AES256 {
     
     /// Supported block types
     ///
-    /// - gcm: standart block mode for e2ee in Binaries Lab
     /// - cbc: legacy block mode only used for mainly for decreption
     public enum BlockType {
-//        case gcm
         case cbc
     }
     
@@ -43,9 +40,6 @@ public struct AES256 {
         let encrypted: Data
         
         switch blockType {
-//        case .gcm:
-//            encrypted = try encryptGCM(data: clearMessage.data, key: key.authenticationKey, iv: key.initializationVector)
-            
         case .cbc:
             encrypted = try cryptCBCPKCS7(data: clearMessage.data, key: key.authenticationKey, iv: key.initializationVector, operation: CCOperation(kCCEncrypt))
         }
@@ -67,59 +61,12 @@ public struct AES256 {
         let decryptedData: Data
         
         switch blockType {
-//        case .gcm:
-//            decryptedData = try decryptGCM(data: encryptedMessage.data, key: key.authenticationKey, iv: key.initializationVector)
-            
         case .cbc:
             decryptedData = try cryptCBCPKCS7(data: encryptedMessage.data, key: key.authenticationKey, iv: key.initializationVector, operation: CCOperation(kCCDecrypt))
         }
         
         return ClearMessage(data: decryptedData)
     }
-    
-    /// Encrypts data with GCM block mode
-    ///
-    /// - Parameter data: data to encrypt
-    /// - Returns: tuple of encrypted data, authentication key and initialization vector
-    /// - Throws: BLCryptoError
-//    static func encryptGCM(data: Data, key: Data, iv: Data) throws -> Data {
-//
-//        do {
-//            let blockMode = GCM(iv: iv.bytes, mode: .combined)
-//
-//            let aes = try AES(key: key.bytes, blockMode: blockMode, padding: .noPadding)
-//            let digest = try aes.encrypt(data.bytes)
-//
-//            let encrypted = Data(digest)
-//            return encrypted
-//
-//        } catch {
-//            throw BLCryptoError.aesGCMEncryptionFailed
-//        }
-//    }
-    
-    /// Decrypts data with GCM block mode
-    ///
-    /// - Parameters:
-    ///   - data: data to decrypt
-    ///   - key: authentication key
-    ///   - iv: initialization vector
-    /// - Returns: decrypted data
-    /// - Throws: any errors throws by CryptoSwift
-//    static func decryptGCM(data: Data, key: Data, iv: Data) throws -> Data {
-//
-//        do {
-//            let blockMode = GCM(iv: iv.bytes, mode: .combined)
-//            let aes = try AES(key: key.bytes, blockMode: blockMode, padding: .noPadding)
-//            let digest = try aes.decrypt(data.bytes)
-//
-//            let decrypted = Data(digest)
-//            return decrypted
-//
-//        } catch {
-//            throw BLCryptoError.aesGCMDecryptionFailed
-//        }
-//    }
     
     /// Single function for encryption with CBC block mode
     ///
