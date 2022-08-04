@@ -1,20 +1,16 @@
-name: Swift
+name: ci-library-crypto-ios
 
 on:
   pull_request:
     branches: [ main ]
 
 jobs:
-  build:
+  test-library-crypto-ios:
 
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        repository: krzyzanowskim/CryptoSwift
+    - uses: actions/checkout@v3
     - name: Build
       run: swift build -v
     - name: Run tests

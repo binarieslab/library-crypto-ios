@@ -11,17 +11,13 @@ public struct BLCrypto {
     
     /// All encryption versions that are currently supported in Binaries Lab
     ///
-    /// - gcmOAEP: AES 256 GCM symetric | RSA OAEP SHA256 asymetric
     /// - cbcPKCS1: AES 256 CBC symetric | RSA PKCS7 asymetric
     public enum VersionType {
-        case gcmOAEP
         case cbcPKCS1
         
         /// returns AES block mode depending on Vivy encryption version
         var aes256BlockMode: AES256.BlockType {
             switch self {
-            case .gcmOAEP:
-                return .gcm
             case .cbcPKCS1:
                 return .cbc
             }
@@ -30,8 +26,6 @@ public struct BLCrypto {
         /// returns RSA padding depending on Vivy encryption version
         var rsaPaddingType: RSA.PaddingType {
             switch self {
-            case .gcmOAEP:
-                return .oaep
             case .cbcPKCS1:
                 return .pkcs1
             }
@@ -76,12 +70,12 @@ public struct BLCrypto {
     public static func decrypt(_ encryptedData: EncryptedData, with key: PrivateKey, versionType version: VersionType) throws -> ClearData {
         
         guard let cipherKey = encryptedData.cipherKey else {
-            throw BLCryptoError.decryptionAlgorithmNotSupported // TODO
+            throw BLCryptoError.decryptionCipherKeyMissing
         }
         
         // 1. Decrypt cipher auth
         guard let encryptedCipherAuth = Data(base64Encoded: cipherKey) else {
-            throw BLCryptoError.decryptionAlgorithmNotSupported // TODO
+            throw BLCryptoError.decryptionCipherKeyMissing
         }
         
         let encryptedCipherMessage = EncryptedMessage(data: encryptedCipherAuth)
@@ -90,7 +84,7 @@ public struct BLCrypto {
         
         // 2. Decode cipher auth with the AES key in IV
         guard let cipherAttr = try? JSONDecoder().decode(CipherAttr.self, from: cipherAttrMessage.data) else {
-            throw BLCryptoError.asn1ParsingFailed // TODO
+            throw BLCryptoError.failedDecodeCipherWithKey
         }
         
         // 3. Decrypt content with AES

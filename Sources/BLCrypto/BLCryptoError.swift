@@ -27,6 +27,9 @@ public enum BLCryptoError: Error {
     case rsaChunkEncryptFailed(index: Int)
     case encryptionAlgorithmNotSupported
     case decryptionAlgorithmNotSupported
+    case encryptionCipherKeyMissing
+    case decryptionCipherKeyMissing
+    case failedDecodeCipherWithKey
     case stringToDataConversionFailed
     case dataToStringConversionFailed
     case invalidDigestSize(digestSize: Int, maxChunkSize: Int)
@@ -75,6 +78,10 @@ public enum BLCryptoError: Error {
             return "The algorithm is not supported for the given key"
         case .decryptionAlgorithmNotSupported:
             return "The algorithm is not supported for the given key"
+        case .encryptionCipherKeyMissing, .decryptionCipherKeyMissing:
+            return "The cipher key is missing"
+        case .failedDecodeCipherWithKey:
+            return "Failed to decode cipher with the given key"
         case .stringToDataConversionFailed:
             return "Couldn't convert string to data using specified encoding"
         case .dataToStringConversionFailed:
